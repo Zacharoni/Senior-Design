@@ -22,6 +22,7 @@
 #include <iostream>
 #include <iterator>
 #include <algorithm>
+#include <cstring>
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -43,6 +44,10 @@ const std::string LAST_VIDEO_STILL_LOCATION = "/tmp/laststill.jpg";
 const std::string WEBCAM_PREFIX = "/dev/video";
 MotionDetector motiondetector;
 bool do_motiondetection = true;
+
+// Senior design
+const std::string TEST_STRING = "EA7THE";
+// End senior design
 
 /** Function Headers */
 bool detectandshow(Alpr* alpr, cv::Mat frame, std::string region, bool writeJson);
@@ -383,7 +388,21 @@ bool detectandshow( Alpr* alpr, cv::Mat frame, std::string region, bool writeJso
         std::cout << "    - " << no_newline << "\t confidence: " << results.plates[i].topNPlates[k].overall_confidence;
         if (templatePattern.size() > 0 || results.plates[i].regionConfidence > 0)
           std::cout << "\t pattern_match: " << results.plates[i].topNPlates[k].matches_template;
-        
+	
+	// Senior design code block test
+
+	if (results.plates[i].topNPlates[k].overall_confidence >= 85){
+		// compare strings
+		//if (strcmp(results.plates[i].topNPlates[k].characters, TEST_STRING) == 0)
+		if (no_newline.compare(TEST_STRING) == 0)
+			std::cout << "\t License match!";
+		else{
+			std::cout << "\t No match, moving on";
+		}
+	}
+
+	// End senior design block
+
         std::cout << std::endl;
       }
     }
