@@ -23,6 +23,8 @@
 #include <iterator>
 #include <algorithm>
 #include <cstring>
+#include <fstream>
+#include <string>
 
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
@@ -47,6 +49,7 @@ bool do_motiondetection = true;
 
 // Senior design
 const std::string TEST_STRING = "EA7THE";
+const int NUM_ENTIRES = 8;
 // End senior design
 
 /** Function Headers */
@@ -346,6 +349,13 @@ bool detectandshow( Alpr* alpr, cv::Mat frame, std::string region, bool writeJso
   timespec startTime;
   getTimeMonotonic(&startTime);
 
+  // Senior design
+  std::fstream fs;
+  //std::array<std::string, 8> database = {std::string "EA7THE", "J784JC", "BA0523", "DA9836", "175AAE", "09GQXR", "XGK9239", "XKF6302"};
+  std::string database[] = {"EA7THE", "J784JC", "BA0523", "DA9836", "175AAE", "09GQXR", "XGK9239", "XKF6302"};
+  int ct = 0, cmp = 0;
+  // End Senior design
+
   std::vector<AlprRegionOfInterest> regionsOfInterest;
   if (do_motiondetection)
   {
@@ -362,7 +372,13 @@ bool detectandshow( Alpr* alpr, cv::Mat frame, std::string region, bool writeJso
   if (measureProcessingTime)
     std::cout << "Total Time to process image: " << totalProcessingTime << "ms." << std::endl;
   
-  
+  // Senior design
+  std::cout << "    Database: \n";
+  for (ct = 0; ct < 8; ct++){
+  	std::cout << "    - " << database[ct] << "\n";
+  }
+  // End Senior design
+
   if (writeJson)
   {
     std::cout << alpr->toJson( results ) << std::endl;
@@ -388,17 +404,30 @@ bool detectandshow( Alpr* alpr, cv::Mat frame, std::string region, bool writeJso
         std::cout << "    - " << no_newline << "\t confidence: " << results.plates[i].topNPlates[k].overall_confidence;
         if (templatePattern.size() > 0 || results.plates[i].regionConfidence > 0)
           std::cout << "\t pattern_match: " << results.plates[i].topNPlates[k].matches_template;
-	
+
+	/* Some skeleton for CSV database reading...
 	// Senior design code block test
 
+	fs.open("../database.csv", std::fstream::in);
+
+	for (ct = 0; ct < 8; ct++){
+		getline(fs, database[ct], ',');
+	}
+
+	fs.close();
+	*/
+
 	if (results.plates[i].topNPlates[k].overall_confidence >= 85){
-		// compare strings
-		//if (strcmp(results.plates[i].topNPlates[k].characters, TEST_STRING) == 0)
-		if (no_newline.compare(TEST_STRING) == 0)
-			std::cout << "\t License match!";
-		else{
-			std::cout << "\t No match, moving on";
+		// compare output string to database
+		for (ct = 0; ct < 8; ct++){
+			cmp = no_newline.compare(database[ct]);
+			if (cmp == 0){
+				std::cout << "\t License match!";
+				break;
+			}
 		}
+		if (cmp != 0)
+			std::cout << "\t No match, moving on";
 	}
 
 	// End senior design block
